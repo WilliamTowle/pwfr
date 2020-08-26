@@ -94,11 +94,11 @@ class BBCReader(ForecastReader):
                     summary.append("Item %d\n" %(num))
                     for subitem in item.childNodes:
                         if subitem.nodeName == 'title':
-                            summary.append("...with title '%s'\n" %(subitem))
+                            summary.append("- title: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
                         elif subitem.nodeName == 'description':
-                            summary.append("...with description '%s'\n" %(subitem))
+                            summary.append("- description: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
                         elif subitem.nodeName == 'pubDate':
-                            summary.append("...with pubDate '%s'\n" %(subitem))
+                            summary.append("- pubDate: '%s'\n" %(" ".join(t.nodeValue for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
 
                 dom.unlink()
             except ExpatError as ee:
