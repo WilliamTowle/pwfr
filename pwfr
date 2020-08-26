@@ -9,8 +9,22 @@
 #*    - Redistributing? Include/offer to deliver original source      *
 #*   Philosophy/full details at http://www.gnu.org/copyleft/gpl.html  *
 
+import getopt, sys
+
 def usage():
     print("This is 'pwfr', the python weather forecast reporter")
 
 if __name__ == "__main__":
-    usage()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(1)
+
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit()
+
+    if len(args) == 0:
+        usage()
