@@ -9,14 +9,23 @@
 #*    - Redistributing? Include/offer to deliver original source      *
 #*   Philosophy/full details at http://www.gnu.org/copyleft/gpl.html  *
 
+import urllib3
+
 default_location= "ls13"
 
 class ForecastReader(object):
     def __init__(self):
+        self.rss_data= None;
         self.rss_url= None;
 
     def process(self):
         return ["[Summary not available]\n"]
+
+    def readRSS(self):
+        http= urllib3.PoolManager()
+        req= http.request('GET', self.rss_url)
+        self.rss_data= req.data
+        return self.rss_data
 
     def setURL(self, ref):
         self.rss_url= ref
@@ -39,6 +48,13 @@ class BBCReader(ForecastReader):
         report.extend(self.process())
         return ''.join(report)
 
+    def process(self):
+        if self.rss_data is not None:
+            return ["%s\n" %(self.rss_data)]
+        else:
+            return ["[Summary not available]\n"]
+
 if __name__ == "__main__":
     forecast= BBCReader(default_location)
+    forecast.readRSS()
     print(forecast.getReport())
