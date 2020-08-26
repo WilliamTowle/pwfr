@@ -73,7 +73,8 @@ class BBCReader(ForecastReader):
             try:
                 dom= parseString(self.rss_data)
 
-                summary.append("RSS parse OK, got DOM with %d nodes\n" %(dom.childNodes.length))
+                if dom.childNodes[0].nodeName == 'rss':
+                    summary.append("RSS parse completed, got DOM with %d node[s] ('rss' first) OK\n" %(dom.childNodes.length))
 
                 dom.unlink()
             except ExpatError as ee:
