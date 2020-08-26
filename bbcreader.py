@@ -9,6 +9,8 @@
 #*    - Redistributing? Include/offer to deliver original source      *
 #*   Philosophy/full details at http://www.gnu.org/copyleft/gpl.html  *
 
+from xml.dom.minidom import parseString
+from xml.parsers.expat import ExpatError
 import urllib3
 
 default_location= "ls13"
@@ -64,10 +66,21 @@ class BBCReader(ForecastReader):
         return ''.join(report)
 
     def process(self):
-        if self._rss_data is not None:
-            return ["%s\n" %(self._rss_data)]
-        else:
+        if self._rss_data is None:
             return ["[Summary not available]\n"]
+        else:
+            summary= []
+            try:
+                dom= parseString(self._rss_data)
+
+                if dom.childNodes[0].nodeName == 'rss':
+                    summary.append("RSS parse completed, got DOM with %d node[s] ('rss' first) OK\n" %(dom.childNodes.length))
+
+                dom.unlink()
+            except ExpatError as ee:
+                summary.append("Parse error in RSS (invalid location '%s'?)" %(self._location))
+
+            return summary
 
 if __name__ == "__main__":
     forecast= BBCReader(default_location)
