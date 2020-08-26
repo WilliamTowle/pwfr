@@ -48,7 +48,21 @@ class ForecastReader(object):
 
 ## BBCReader
 ##
-## For parsing the BBC Weather RSS feeds
+## For parsing the BBC Weather RSS feeds, which provide:
+## "title" field, with:
+##      name (at start of title)
+##      brief text summary
+##      temperatures
+## "description" field, containing:
+##      max/min temperatures
+##      wind direction and speed ("<n>mph")
+##      visibility (word)
+##      pressure ("<n>mb")
+##      humidity
+##      UV risk (number on a scale)
+##      pollution (eg. "low")
+##      sunrise/sunset times ("HH:MM <TZ>")
+## "pubDate" field, with human readable timestamp/timezone
 
 class BBCReader(ForecastReader):
     def __init__(self, location):
@@ -75,6 +89,16 @@ class BBCReader(ForecastReader):
 
                 if dom.childNodes[0].nodeName == 'rss':
                     summary.append("RSS parse completed, got DOM with %d node[s] ('rss' first) OK\n" %(dom.childNodes.length))
+
+                for (num, item) in enumerate(dom.getElementsByTagName('item'), start=1):
+                    summary.append("Item %d\n" %(num))
+                    for subitem in item.childNodes:
+                        if subitem.nodeName == 'title':
+                            summary.append("- title: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
+                        elif subitem.nodeName == 'description':
+                            summary.append("- description: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
+                        elif subitem.nodeName == 'pubDate':
+                            summary.append("- pubDate: '%s'\n" %(" ".join(t.nodeValue for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
 
                 dom.unlink()
             except ExpatError as ee:
