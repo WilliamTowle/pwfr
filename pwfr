@@ -9,8 +9,34 @@
 #*    - Redistributing? Include/offer to deliver original source      *
 #*   Philosophy/full details at http://www.gnu.org/copyleft/gpl.html  *
 
-def usage():
-    print("This is 'pwfr', the python weather forecast reporter")
+import getopt, sys
+
+def usage(message=None):
+    if message:
+        print(message)
+    else:
+        print("This is 'pwfr', the python weather forecast reporter")
+    print
+    print("Usage:")
+    print("\t%s [OPTIONS] LOCATION" %(sys.argv[0]))
+    print
+    print("Options:")
+    print("\t-h, --help: show this help")
 
 if __name__ == "__main__":
-    usage()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.GetoptError as oe:
+        usage("Error in options: %s" %(oe.msg))
+        sys.exit(1)
+
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit()
+
+    if len(args) == 0:
+        usage("ERROR: Expected a location argument")
+        sys.exit(1)
+    else:
+        print("Unprocessed arguments were given...")
