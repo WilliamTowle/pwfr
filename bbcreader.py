@@ -12,8 +12,15 @@
 default_location= "ls13"
 
 class ForecastReader(object):
+    def __init__(self):
+        self._rss_url= None;
+
     def process(self):
         return ["[Summary not available]\n"]
+
+    def setURL(self, ref):
+        self._rss_url= ref
+
 
 ## BBCReader
 ##
@@ -23,9 +30,12 @@ class BBCReader(ForecastReader):
     def __init__(self, location):
         super(BBCReader, self).__init__()
         self._location= location
+        #self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/%s" %(self._location))
+        self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/%s" %(self._location))
 
     def getReport(self):
         report= ["BBC Weather for location '%s':\n" %(self._location)]
+        report.append("[URL: %s]\n" %(self._rss_url))
         report.extend(self.process())
         return ''.join(report)
 
