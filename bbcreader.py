@@ -15,11 +15,24 @@ default_location= "ls13"
 
 class ForecastReader(object):
     def __init__(self):
+        self._cache_file= None;
         self._rss_data= None;
         self._rss_url= None;
 
     def process(self):
         return ["[Summary not available]\n"]
+
+    def readCache(self):
+        with open(self._cache_file) as file:
+            self._rss_data= file.read()
+
+    def setCacheFile(self, name):
+        self._cache_file= name
+
+    def writeCache(self):
+        if hasattr(self, 'rss_data'):
+            with open(self._cache_file, 'w') as file:
+                file.write(self._rss_data)
 
     def readRSS(self):
         http= urllib3.PoolManager()
@@ -40,7 +53,9 @@ class BBCReader(ForecastReader):
         super(BBCReader, self).__init__()
         self._location= location
         #self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/%s" %(self._location))
+        #self.setCacheFile("bbcreader-forecast-%s.dat" %(location))
         self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/%s" %(self._location))
+        self.setCacheFile("bbcreader-current-%s.dat" %(location))
 
     def getReport(self):
         report= ["BBC Weather for location '%s':\n" %(self._location)]
