@@ -83,5 +83,6 @@ class BBCReader(ForecastReader):
 
 if __name__ == "__main__":
     forecast= BBCReader(default_location)
-    forecast.readRSS()
+    forecast.readCache()
+    #forecast.readRSS()
     print(forecast.getReport())
