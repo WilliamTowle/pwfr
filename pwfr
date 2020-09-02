@@ -12,16 +12,25 @@
 import getopt, sys
 import bbcreader
 import curses
+from threading import Timer
 
 
-def tui_loop(stdscr):
+def tui_loop(stdscr, delaysec=5):
+    tui_loop.timer= None
 
     def tui_quit():
+        tui_loop.timer.cancel()
         sys.exit(1)
 
     def tui_update(scr):
-        #scr.clear()
         scr.addstr("...")
+        scr.refresh()
+
+        if tui_loop.timer is not None:
+            tui_loop.timer.cancel()
+        tui_loop.timer= Timer(delaysec, tui_update, [scr])
+        tui_loop.timer.start()
+
 
     ## tui_loop main body
     stdscr.addstr("Press Q to quit")
@@ -38,6 +47,8 @@ def tui_loop(stdscr):
         else:
             tui_update(stdscr)
 
+    if tui_loop.timer is not None:
+        tui_loop.timer.cancel()
 
 def usage(message=None):
     if message:
