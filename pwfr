@@ -11,6 +11,33 @@
 
 import getopt, sys
 import bbcreader
+import curses
+
+
+def tui_loop(stdscr):
+
+    def tui_quit():
+        sys.exit(1)
+
+    def tui_update(scr):
+        #scr.clear()
+        scr.addstr("...")
+
+    ## tui_loop main body
+    stdscr.addstr("Press Q to quit")
+    tui_update(stdscr)
+    stdscr.keypad(1)
+    while 1:
+        try:
+            ch= stdscr.getch()
+        except:
+            tui_quit()
+
+        if ch == ord('q'):
+            tui_quit()
+        else:
+            tui_update(stdscr)
+
 
 def usage(message=None):
     if message:
@@ -23,10 +50,13 @@ def usage(message=None):
     print
     print("Options:")
     print("\t-h, --help: show this help")
+    print("\t--noui: show report without engaging UI")
 
 if __name__ == "__main__":
+    show_ui= True
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "noui"])
     except getopt.GetoptError as oe:
         usage("Error in options: %s" %(oe.msg))
         sys.exit(1)
@@ -35,6 +65,8 @@ if __name__ == "__main__":
         if opt in ('-h', '--help'):
             usage()
             sys.exit()
+        elif opt in ('--noui'):
+            show_ui= False
 
     if len(args) == 0:
         usage("ERROR: Expected a location argument")
@@ -45,4 +77,7 @@ if __name__ == "__main__":
     else:
         fr= bbcreader.BBCReader(args[0])
         fr.readRSS()
-        print(fr.getSummary())
+        if show_ui:
+            curses.wrapper(tui_loop)
+        else:
+            print(fr.getSummary())
