@@ -15,7 +15,7 @@ import curses
 from threading import Timer
 
 
-def tui_loop(stdscr):
+def tui_loop(stdscr, fr):
     tui_loop.timer= None
 
     def tui_quit():
@@ -23,8 +23,22 @@ def tui_loop(stdscr):
         sys.exit(1)
 
     def tui_update(scr):
-        scr.addstr("...")
-        scr.refresh()
+        dwin_title.erase()
+        dwin_title.addstr(0,25, "Python Weather Forecast Reader")
+        dwin_title.noutrefresh()
+
+        dwin_now.clear()
+        #dwin_now.addstr("...")
+        dwin_now.addstr(1,0, fr.getReport())
+        #dwin_now.box()
+        dwin_now.noutrefresh()
+
+        dwin_status.erase()
+        dwin_status.addstr(0,32, "Press Q to quit")
+        dwin_status.noutrefresh()
+
+        curses.doupdate()
+        #scr.refresh()
 
         if tui_loop.timer is not None:
             tui_loop.timer.cancel()
@@ -33,7 +47,12 @@ def tui_loop(stdscr):
 
 
     ## tui_loop main body
-    stdscr.addstr("Press Q to quit")
+    global dwin_title, dwin_now, dwin_status
+    global scr_h,scr_w
+    scr_h, scr_w= stdscr.getmaxyx()
+    dwin_title= stdscr.derwin(1,scr_w,0,0)
+    dwin_now= stdscr.derwin(scr_h-2,scr_w,1,0)
+    dwin_status= stdscr.derwin(1,scr_w,scr_h-1,0)
     tui_update(stdscr)
     stdscr.keypad(1)
     while 1:
@@ -46,6 +65,7 @@ def tui_loop(stdscr):
             tui_quit()
         else:
             tui_update(stdscr)
+
 
     if tui_loop.timer is not None:
         tui_loop.timer.cancel()
@@ -87,6 +107,6 @@ if __name__ == "__main__":
         fr= bbcreader.BBCReader(args[0])
         fr.readRSS()
         if show_ui:
-            curses.wrapper(tui_loop)
+            curses.wrapper(tui_loop, fr)
         else:
             print(fr.getReport())
