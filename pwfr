@@ -14,10 +14,16 @@ import bbcreader
 
 def usage():
     print("This is 'pwfr', the python weather forecast reporter")
+    print
+    print("Usage:")
+    print("\t%s OPTIONS LOCATION" %(sys.argv[0]))
+    print
+    print("Options:")
+    print("\t-h, --help: show this help")
 
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "noui"])
     except getopt.GetoptError:
         usage()
         sys.exit(1)
