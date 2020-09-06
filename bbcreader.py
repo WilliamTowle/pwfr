@@ -15,6 +15,31 @@ import urllib3
 
 default_location= "ls13"
 
+
+class WeatherData(object):
+    # proxy for dict type so we can have a fixed, predefined,
+    # set of keys mapping to an intended default value
+    def __init__(self):
+        self._data= {
+                'title': None,
+                'description': None,
+                'pubDate': None
+                }
+
+    def __getitem__(self, name):
+        if name in self._data:
+            return self._data[name]
+        else:
+            raise KeyError(name)    # can't retrieve from nonexistent key
+
+    def __setitem__(self, name, value):
+        if name in self._data:
+            self._data[name]= value
+        else:
+            raise KeyError(name)    # can only replace where key exists
+
+
+
 class ForecastReader(object):
     def __init__(self):
         self._cache_file= None;
@@ -79,6 +104,7 @@ class BBCReader(ForecastReader):
         #self.setCacheFile("bbcreader-forecast-%s.dat" %(location))
         self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/%s" %(self._location))
         self.setCacheFile("bbcreader-current-%s.dat" %(location))
+        self.forecast= []
 
     def getSummary(self):
         report= ["BBC Weather for location '%s':\n" %(self._location)]
@@ -91,18 +117,25 @@ class BBCReader(ForecastReader):
             return [self.getStatus()]
         else:
             summary= []
+            self.forecast= []
             try:
                 dom= parseString(self._rss_data)
 
                 for (num, item) in enumerate(dom.getElementsByTagName('item'), start=1):
-                    summary.append("Item %d\n" %(num))
+                    itemData= WeatherData()
                     for subitem in item.childNodes:
                         if subitem.nodeName == 'title':
-                            summary.append("- title: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
+                            itemData["title"]= " ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)
                         elif subitem.nodeName == 'description':
-                            summary.append("- description: %s\n" %(" ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
+                            itemData["description"]= " ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)
                         elif subitem.nodeName == 'pubDate':
-                            summary.append("- pubDate: '%s'\n" %(" ".join(t.nodeValue for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)))
+                            itemData["pubDate"]= " ".join(t.nodeValue for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)
+
+                    summary.append("Item %d\n" %(num))
+                    summary.append("- title: %s\n" %(itemData["title"]))
+                    summary.append("- description: %s\n" %(itemData["description"]))
+                    summary.append("- pubDate: %s\n" %(itemData["pubDate"]))
+                    self.forecast.append(itemData)
 
                 dom.unlink()
                 self.status= 'OK'
