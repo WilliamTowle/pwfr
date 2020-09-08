@@ -11,6 +11,7 @@
 
 from xml.dom.minidom import parseString
 from xml.parsers.expat import ExpatError
+import re
 import urllib3
 
 default_location= "ls13"
@@ -23,7 +24,22 @@ class WeatherData(object):
         self._data= {
                 'title': None,
                 'description': None,
-                'pubDate': None
+                'day': None,
+                'summary': None,
+                'sunrise': None,
+                'sunset': None,
+                'pubDate': None,
+                'humidity': None,
+                'pollution.level': None,
+                'pressure.level': None,
+                'pressure.change': None,
+                'temp.max': None,
+                'temp.min': None,
+                'temp.now': None,
+                'uv-risk': None,
+                'visibility': None,
+                'wind.direction': None,
+                'wind.speed': None
                 }
 
     def __getitem__(self, name):
@@ -126,6 +142,47 @@ class BBCReader(ForecastReader):
                             itemData["description"]= " ".join(t.nodeValue.encode('ascii',errors='ignore') for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)
                         elif subitem.nodeName == 'pubDate':
                             itemData["pubDate"]= " ".join(t.nodeValue for t in subitem.childNodes if t.nodeType == t.TEXT_NODE)
+
+                    ## Title starts with the day name and can include the
+                    ## time; a summary follows the first colon
+                    #match= re.match("([A-Z][a-z]*)(( [^:]*|:[^  ]*)*):", itemData["title"])
+                    match= re.match("([A-Z][a-z]*)(( [^:]*|:[^  ]*)*): ([^,]*),", itemData["title"])
+                    if match:
+                        itemData["day"]= match.group(1)
+                        itemData["summary"]= match.group(4)
+
+                    # Look between ", " for "Field: value", where values
+                    # may take the form "..., ..." or end the string
+                    patt= re.compile("([^:]*): ([^,]*)(, ([^:,]*))*(?:, |$)")
+                    for match in re.finditer(patt,itemData["description"]):
+                        field= match.group(1)
+                        if field == 'Humidity':
+                            itemData["humidity"]= match.group(2)
+                        elif field == 'Pollution':
+                            itemData["pollution.level"]= match.group(2)
+                        elif field == 'Pressure':
+                            itemData["pressure.level"]= match.group(2)
+                            itemData["pressure.change"]= match.group(3)
+                        elif field == 'Sunrise':
+                            itemData["sunrise"]= match.group(2)
+                        elif field == 'Sunset':
+                            itemData["sunset"]= match.group(2)
+                        elif field == 'Temperature':
+                            itemData["temp.now"]= match.group(2)
+                        elif field == 'Maximum Temperature':
+                            itemData["temp.max"]= match.group(2)
+                        elif field == 'Minimum Temperature':
+                            itemData["temp.min"]= match.group(2)
+                        elif field == 'UV Risk':
+                            itemData["uv-risk"]= match.group(2)
+                        elif field == 'Visibility':
+                            itemData["visibility"]= match.group(2)
+                        elif field == 'Wind Direction':
+                            itemData["wind.direction"]= match.group(2)
+                        elif field == 'Wind Speed':
+                            itemData["wind.speed"]= match.group(2)
+#                        else:
+#                            summary.append("** THIS FIELD UNHANDLED **\n")
 
                     summary.append("Item %d\n" %(num))
                     summary.append("- title: %s\n" %(itemData["title"]))
