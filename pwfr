@@ -29,19 +29,34 @@ def tui_loop(stdscr, fr):
 
         dwin_now.clear()
         fr.process()
-        if len(fr.forecast) == 0:
+        fc= fr.forecast
+        if len(fc) == 0:
             dwin_now.addstr(1,0, fr.getReport())	## displays error
         else:
-            for item in fr.forecast:
+            today= fc.pop(0)
+            dwin_now.addstr("\n")
+            dwin_now.addstr("%s:\n" %(today["day"]))
+            dwin_now.addstr("Summary: %s\n" %(today["summary"]))
+            if today["temp.now"]:
+                dwin_now.addstr("Temp: %s\n" %(today["temp.now"]))
+            else:
+                dwin_now.addstr("Temp: %s to %s\n" %(today["temp.min"], today["temp.max"]))
+            dwin_now.addstr("Sunrise: %s, sunset: %s\n" %(today["sunrise"], today["sunset"]))
+            dwin_now.addstr("Press: %s\n" %(today["pressure.level"]))
+            dwin_now.addstr("Visibility: %s\n" %(today["visibility"]))
+            dwin_now.addstr("Wind dir: %s\n" %(today["wind.direction"]))
+            dwin_now.addstr("Wind speed: %s\n" %(today["wind.speed"]))
+
+            for item in fc:
                 dwin_now.addstr("\n")
-                dwin_now.addstr("%s\n" %(item["title"]))
+                dwin_now.addstr("%s:\n" %(item["day"]))
+                dwin_now.addstr("Summary: %s\n" %(item["summary"]))
                 if item["temp.now"]:
                     dwin_now.addstr("Temp: %s\n" %(item["temp.now"]))
                 else:
                     dwin_now.addstr("Temp: %s to %s\n" %(item["temp.min"], item["temp.max"]))
                 dwin_now.addstr("Press: %s\n" %(item["pressure.level"]))
-                dwin_now.addstr("Wind dir: %s\n" %(item["wind.direction"]))
-                dwin_now.addstr("Wind speed: %s\n" %(item["wind.speed"]))
+                dwin_now.addstr("Wind: %s, %s\n" %(item["wind.direction"], item["wind.speed"]))
         dwin_now.noutrefresh()
 
         dwin_status.erase()
