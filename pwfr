@@ -33,8 +33,19 @@ def tui_loop(stdscr, fr, delaysec=5):
         #fr.readCache()
         fr.readRSS()
         fr.process()
-        dwin_now.addstr(1,0, fr.getSummary())
-        #dwin_now.box()
+        if len(fr.forecast) == 0:
+            dwin_now.addstr(1,0, fr.getStatus())	## displays error
+        else:
+            for item in fr.forecast:
+                dwin_now.addstr("\n")
+                dwin_now.addstr("%s\n" %(item["title"]))
+                if item["temp.now"]:
+                    dwin_now.addstr("Temp: %s\n" %(item["temp.now"]))
+                else:
+                    dwin_now.addstr("Temp: %s to %s\n" %(item["temp.min"], item["temp.max"]))
+                dwin_now.addstr("Press: %s\n" %(item["pressure.level"]))
+                dwin_now.addstr("Wind dir: %s\n" %(item["wind.direction"]))
+                dwin_now.addstr("Wind speed: %s\n" %(item["wind.speed"]))
         dwin_now.noutrefresh()
 
         dwin_status.erase()
