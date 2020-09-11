@@ -10,6 +10,7 @@
 #*   Philosophy/full details at http://www.gnu.org/copyleft/gpl.html  *
 
 import getopt, sys
+import bbcreader
 
 def usage(message=None):
     if message:
@@ -38,5 +39,9 @@ if __name__ == "__main__":
     if len(args) == 0:
         usage("ERROR: Expected a location argument")
         sys.exit(1)
+    elif len(args) > 1:
+        usage("ERROR: Only one location expected")
+        sys.exit(1)
     else:
-        print("Unprocessed arguments were given...")
+        fr= bbcreader.BBCReader(args[0])
+        print(fr.getSummary())
