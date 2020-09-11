@@ -116,10 +116,10 @@ class BBCReader(ForecastReader):
     def __init__(self, location):
         super(BBCReader, self).__init__()
         self._location= location
-        #self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/%s" %(self._location))
-        #self.setCacheFile("bbcreader-forecast-%s.dat" %(location))
-        self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/%s" %(self._location))
-        self.setCacheFile("bbcreader-current-%s.dat" %(location))
+        self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/%s" %(self._location))
+        self.setCacheFile("bbcreader-forecast-%s.dat" %(location))
+        #self.setURL("https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/%s" %(self._location))
+        #self.setCacheFile("bbcreader-current-%s.dat" %(location))
         self.forecast= []
 
     def getSummary(self):
@@ -203,7 +203,9 @@ class BBCReader(ForecastReader):
 
 if __name__ == "__main__":
     forecast= BBCReader(default_location)
-    forecast.readCache()
-    #forecast.readRSS()
-    forecast.writeCache()
-    #print(forecast.getSummary())
+    #forecast.readCache()
+    #forecast.process()
+    #print("Forecast has %d items\n" %(len(forecast.forecast)))
+    forecast.readRSS()
+    #forecast.writeCache()
+    print(forecast.getSummary())
