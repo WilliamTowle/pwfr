@@ -11,18 +11,28 @@
 
 default_location= "ls13"
 
+class ForecastReader(object):
+    def __init__(self):
+        self.status= 'Summary unavailable'
+
+    def getStatus(self):
+        return "STATUS: %s\n" %(self.status)
+
+    def getSummary(self):
+        return self.getStatus()
+
 ## BBCReader
 ##
 ## For parsing the BBC Weather RSS feeds
 
-class BBCReader:
+class BBCReader(ForecastReader):
     def __init__(self, location):
+        super(BBCReader, self).__init__()
         self._location= location
-        self.status= 'Summary unavailable'
 
     def getSummary(self):
         report= ["BBC Weather for location '%s':\n" %(self._location)]
-        report.append("STATUS: %s\n" %(self.status))
+        report.extend(self.getStatus())
         return ''.join(report)
 
 if __name__ == "__main__":
